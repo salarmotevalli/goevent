@@ -1,0 +1,57 @@
+[
+  {
+    "method": "POST",
+    "path": "/users/login",
+    "name": "event-manager/delivery/httpserver.Server.Login-fm",
+    "data": {"username": "salarmotevalli", "password": "test1234"}
+  },
+  {
+    "method": "echo_route_not_found",
+    "path": "/events/*",
+    "name": "github.com/labstack/echo/v4.init.func1"
+  },
+  {
+    "method": "DELETE",
+    "path": "/events/:id",
+    "name": "event-manager/delivery/httpserver.Server.DeleteEvent-fm"
+  },
+  {
+    "method": "GET",
+    "path": "/health-check",
+    "name": "event-manager/delivery/httpserver.Server.healthCheck-fm"
+  },
+  {
+    "method": "echo_route_not_found",
+    "path": "/events",
+    "name": "github.com/labstack/echo/v4.init.func1"
+  },
+  {
+    "method": "GET",
+    "path": "/events/",
+    "name": "event-manager/delivery/httpserver.Server.IndexEvent-fm"
+  },
+  {
+    "method": "GET",
+    "path": "/events/:id",
+    "name": "event-manager/delivery/httpserver.Server.ShowEvent-fm"
+  },
+  {
+    "method": "POST",
+    "path": "/events/",
+    "name": "event-manager/delivery/httpserver.Server.CreateEvent-fm",
+    "data": {"title": "Tech Meeting", "location": "Dubi" ,"start_at": "2025-03-23T15:04:05Z", "owner_id": 3},
+    "headers": ["Authorization"]
+  },
+  {
+    "method": "PUT",
+    "path": "/events/:id",
+    "name": "event-manager/delivery/httpserver.Server.UpdateEvent-fm",
+    "data": {"title": "Tech Meeting", "location": "Dubi" ,"start_at": "2025-03-23T15:04:05Z", "owner_id": 3},
+    "headers": ["Authorization"]
+  },
+  {
+    "method": "POST",
+    "path": "/users/register",
+    "name": "event-manager/delivery/httpserver.Server.Register-fm"
+  }
+]

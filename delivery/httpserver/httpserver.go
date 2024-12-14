@@ -1,14 +1,12 @@
 package httpserver
 
 import (
-	"encoding/json"
 	"errors"
 	"event-manager/config"
 	"event-manager/service/authservice"
 	"event-manager/service/eventservice"
 	"event-manager/service/userservice"
 	internalMiddleware "event-manager/delivery/httpserver/middleware"
-	"log"
 	"log/slog"
 	"net/http"
 
@@ -57,19 +55,7 @@ func (s Server) Serve() {
 	eventGroup.PUT("/:id", s.UpdateEvent)
 	eventGroup.DELETE("/:id", s.DeleteEvent)
 
-	// logRoutes(e.Routes())
-
 	if err := e.Start(":8080"); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("failed to start server", "error", err)
 	}
-
-}
-
-func logRoutes(routes []*echo.Route) {
-	data, err := json.MarshalIndent(routes, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-
-	log.Println(string(data))
 }

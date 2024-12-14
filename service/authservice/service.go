@@ -37,7 +37,7 @@ func (s AuthService) VerifyToken(bearerToken string) (*Claims, error) {
 	tokenStr := strings.Replace(bearerToken, "Bearer ", "", 1)
 
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return s.config.SignKey, nil
+		return []byte(s.config.SignKey), nil
 	}, jwt.WithLeeway(5*time.Second))
 
 	if err != nil {
@@ -62,9 +62,6 @@ func (s AuthService) createToken(userID uint, subject string, expireDuration tim
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := accessToken.SignedString([]byte(s.config.SignKey))
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
+	
+	return tokenString, err
 }
