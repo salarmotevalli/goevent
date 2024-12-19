@@ -1,15 +1,14 @@
 package httpserver
 
 import (
-	"event-manager/service/userservice"
-	// "fmt"
+	"event-manager/param/userparam"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 func (s Server) Login(c echo.Context) error {
-	var request userservice.LoginRequest
+	var request userparam.LoginRequest
 	if err := c.Bind(&request); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
@@ -27,7 +26,7 @@ func (s Server) Login(c echo.Context) error {
 }
 
 func (s Server) Register(c echo.Context) error {
-	var request userservice.RegisterRequest
+	var request userparam.RegisterUserRequest
 	if err := c.Bind(&request); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}

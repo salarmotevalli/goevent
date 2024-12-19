@@ -40,7 +40,6 @@ func (s *EventService) GetAllEvents(userId uint) (eventparam.GetAllEventResponse
 	return eventparam.GetAllEventResponse{Events: eventInfos}, nil
 }
 
-
 func (s *EventService) GetEvent(eventId uint) (eventparam.GetEventResponse, error) {
 	event, exist, err := s.repo.GetEventByID(eventId)
 	if err != nil {
@@ -59,7 +58,6 @@ func (s *EventService) GetEvent(eventId uint) (eventparam.GetEventResponse, erro
 	}, nil
 }
 
-
 func (s *EventService) CreateNewEvent(req eventparam.CreateEventRequest) (eventparam.CreateEventResponse, error) {
 	var e entity.Event
 
@@ -68,16 +66,15 @@ func (s *EventService) CreateNewEvent(req eventparam.CreateEventRequest) (eventp
 	e.SetLocation(req.Location)
 	e.SetStartAt(req.StartAt)
 	e.Activate()
-	
+
 	event, err := s.repo.CreateEvent(e)
 	var eventInfo eventparam.EventInfo
 	eventInfo.FillFromEventEntity(event)
-	
-	return eventparam.CreateEventResponse {
+
+	return eventparam.CreateEventResponse{
 		Event: eventInfo,
 	}, err
 }
-
 
 func (s *EventService) UpdateEvent(req eventparam.UpdateEventRequest) (eventparam.UpdateEventResponse, error) {
 	// fetch event
@@ -109,7 +106,7 @@ func (s *EventService) DeleteEvent(req eventparam.DeleteEventRequest) (eventpara
 	if err != nil {
 		return eventparam.DeleteEventResponse{}, err
 	}
-	
+
 	// check is there or notfound
 	if !exist {
 		return eventparam.DeleteEventResponse{}, errors.New("not found")

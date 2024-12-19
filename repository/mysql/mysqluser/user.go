@@ -3,8 +3,8 @@ package mysqluser
 import (
 	"database/sql"
 	"event-manager/entity"
+	"event-manager/pkg/richerror"
 	"event-manager/repository/mysql"
-	"fmt"
 )
 
 type UserRepo struct {
@@ -34,6 +34,8 @@ func (e *userModel) ToUserEntity() entity.User {
 }
 
 func (r UserRepo) GetUserByUsername(username string) (entity.User, bool, error) {
+	const op = "mysqluser.GetUserByUsername"
+
 	var model userModel
 
 	row := r.conn.Conn().QueryRow(`select id, username, hashed_password from users where username = ?`, username)
@@ -43,18 +45,22 @@ func (r UserRepo) GetUserByUsername(username string) (entity.User, bool, error) 
 			return entity.User{}, false, nil
 		}
 
-		return entity.User{}, false, err
+		return entity.User{}, false, richerror.New(op).
+			WithErr(err).WithKind(richerror.KindUnexpected)
 	}
 
 	return model.ToUserEntity(), true, nil
 }
 
 func (r UserRepo) CreateUser(u entity.User) (entity.User, error) {
+	const op = "mysqluser.CreateUser"
+
 	res, err := r.conn.Conn().Exec(`insert into users (username, hashed_password) values (?, ?)`,
 		u.Username(), u.Password())
 
 	if err != nil {
-		return entity.User{}, fmt.Errorf("can't execute command: %w", err)
+		return entity.User{}, richerror.New(op).
+			WithErr(err).WithKind(richerror.KindUnexpected)
 	}
 
 	// error is always nil

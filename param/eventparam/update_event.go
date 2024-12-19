@@ -12,4 +12,4 @@ type UpdateEventRequest struct {
 
 type UpdateEventResponse struct {
 	Event EventInfo `json:"event"`
-} 
+}

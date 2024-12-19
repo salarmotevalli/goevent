@@ -10,8 +10,8 @@ import (
 )
 
 type Config struct {
-	SignKey               string        
-	AccessExpirationTime  time.Duration 
+	SignKey               string
+	AccessExpirationTime  time.Duration
 	RefreshExpirationTime time.Duration
 	AccessSubject         string
 	RefreshSubject        string
@@ -62,6 +62,6 @@ func (s AuthService) createToken(userID uint, subject string, expireDuration tim
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := accessToken.SignedString([]byte(s.config.SignKey))
-	
+
 	return tokenString, err
 }

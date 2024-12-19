@@ -18,5 +18,3 @@ func (e *EventInfo) FillFromEventEntity(event entity.Event) {
 	e.Location = event.Location()
 	e.StartAt = event.StartAt()
 }
-
-

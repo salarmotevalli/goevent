@@ -3,10 +3,10 @@ package httpserver
 import (
 	"errors"
 	"event-manager/config"
+	internalMiddleware "event-manager/delivery/httpserver/middleware"
 	"event-manager/service/authservice"
 	"event-manager/service/eventservice"
 	"event-manager/service/userservice"
-	internalMiddleware "event-manager/delivery/httpserver/middleware"
 	"log/slog"
 	"net/http"
 
@@ -39,7 +39,7 @@ func (s Server) Serve() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-
+	
 	e.GET("health-check", s.healthCheck)
 
 	// auth

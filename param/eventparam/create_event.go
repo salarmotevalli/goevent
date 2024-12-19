@@ -13,4 +13,4 @@ type CreateEventRequest struct {
 
 type CreateEventResponse struct {
 	Event EventInfo `json:"event"`
-} 
+}

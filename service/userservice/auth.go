@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"event-manager/entity"
+	"event-manager/param/userparam"
 	"fmt"
 	"log"
 )
@@ -31,25 +32,16 @@ func New(r UserRepo, as AuthService) UserService {
 	}
 }
 
-type RegisterRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type RegisterResponse struct {
-	User entity.User
-}
-
-func (s *UserService) Register(req RegisterRequest) (RegisterResponse, error) {
+func (s *UserService) Register(req userparam.RegisterUserRequest) (userparam.RegisterUserResponse, error) {
 	// check is there username in db
 	_, exist, err := s.repo.GetUserByUsername(req.Username)
 	if err != nil {
 		log.Println(err)
-		return RegisterResponse{}, errors.New("unexpected")
+		return userparam.RegisterUserResponse{}, errors.New("unexpected")
 	}
 
 	if exist {
-		return RegisterResponse{}, errors.New("user already exists")
+		return userparam.RegisterUserResponse{}, errors.New("user already exists")
 	}
 
 	// hash the password
@@ -62,47 +54,38 @@ func (s *UserService) Register(req RegisterRequest) (RegisterResponse, error) {
 
 	user, err = s.repo.CreateUser(user)
 
-	return RegisterResponse{
-		User: user,
+	return userparam.RegisterUserResponse{
+		User: userparam.UserInfo{Username: user.Username()},
 	}, err
 }
 
-type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type LoginResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-}
-
-func (s *UserService) Login(req LoginRequest) (LoginResponse, error) {
+func (s *UserService) Login(req userparam.LoginRequest) (userparam.LoginResponse, error) {
 	// check is there username and password in db
 	user, exist, err := s.repo.GetUserByUsername(req.Username)
 	if err != nil {
-		return LoginResponse{}, errors.New("unexpected")
+		return userparam.LoginResponse{}, errors.New("unexpected")
 	}
 
 	if !exist {
-		return LoginResponse{}, errors.New("user not found")
+		return userparam.LoginResponse{}, errors.New("user not found")
 	}
 
 	if user.Password() != getMD5Hash(req.Password) {
-		return LoginResponse{}, errors.New("password is incorrect")
+		return userparam.LoginResponse{}, errors.New("password is incorrect")
 	}
 
 	accessToken, err := s.auth.CreateAccessToken(user)
 	if err != nil {
-		return LoginResponse{}, fmt.Errorf("unexpected error: %w", err)
+		return userparam.LoginResponse{}, fmt.Errorf("unexpected error: %w", err)
 	}
 
 	refreshToken, err := s.auth.CreateRefreshToken(user)
 	if err != nil {
-		return LoginResponse{}, fmt.Errorf("unexpected error: %w", err)
+		return userparam.LoginResponse{}, fmt.Errorf("unexpected error: %w", err)
 	}
 
-	return LoginResponse{
+	return userparam.LoginResponse{
+		User:         userparam.UserInfo{Username: user.Username()},
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, err

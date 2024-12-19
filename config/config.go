@@ -8,5 +8,5 @@ type HttpServer struct {
 
 type Config struct {
 	HttpServer HttpServer
-	AuthConfig    authservice.Config
+	AuthConfig authservice.Config
 }

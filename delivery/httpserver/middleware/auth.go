@@ -3,8 +3,8 @@ package middleware
 import (
 	cfg "event-manager/config"
 	"event-manager/service/authservice"
-	"github.com/labstack/echo/v4"
 	mw "github.com/labstack/echo-jwt/v4"
+	"github.com/labstack/echo/v4"
 )
 
 func Auth(service authservice.AuthService, config authservice.Config) echo.MiddlewareFunc {

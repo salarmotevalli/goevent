@@ -48,7 +48,7 @@ func (s Server) IndexEvent(c echo.Context) error {
 func (s Server) ShowEvent(c echo.Context) error {
 	// TODO: check user is owner of event
 	// claim := c.Get(config.AuthMiddlewareContextKey).(*authservice.Claims)
-	
+
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 
@@ -68,7 +68,7 @@ func (s Server) ShowEvent(c echo.Context) error {
 func (s Server) UpdateEvent(c echo.Context) error {
 	// TODO: check user is owner of event
 	// claim := c.Get(config.AuthMiddlewareContextKey).(*authservice.Claims)
-	
+
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 
@@ -93,16 +93,16 @@ func (s Server) UpdateEvent(c echo.Context) error {
 func (s Server) DeleteEvent(c echo.Context) error {
 	// TODO: check user is owner of event
 	// claim := c.Get(config.AuthMiddlewareContextKey).(*authservice.Claims)
-	
+
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
- 
+
 	_, sErr := s.eventSvc.DeleteEvent(
 		eventparam.DeleteEventRequest{EventID: uint(id)})
-	
+
 	if sErr != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, sErr)
 	}
