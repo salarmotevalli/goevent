@@ -1,13 +1,26 @@
-package httpserver
+package userhandler
 
 import (
+	"event-manager/service/authservice"
+	"event-manager/service/userservice"
 	"event-manager/param/userparam"
 	"net/http"
-
 	"github.com/labstack/echo/v4"
 )
 
-func (s Server) Login(c echo.Context) error {
+type UserHandler struct {
+	UserSvc userservice.UserService
+	AuthSvc authservice.AuthService
+}
+
+func New(us userservice.UserService, as authservice.AuthService) UserHandler {
+	return UserHandler {
+		UserSvc: us,
+		AuthSvc: as,
+	}
+}
+
+func (h UserHandler) Login(c echo.Context) error {
 	var request userparam.LoginRequest
 	if err := c.Bind(&request); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -17,7 +30,7 @@ func (s Server) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity)
 	}
 
-	result, err := s.userSvc.Login(request)
+	result, err := h.UserSvc.Login(request)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
@@ -25,7 +38,7 @@ func (s Server) Login(c echo.Context) error {
 	return c.JSON(http.StatusAccepted, result)
 }
 
-func (s Server) Register(c echo.Context) error {
+func (h UserHandler) Register(c echo.Context) error {
 	var request userparam.RegisterUserRequest
 	if err := c.Bind(&request); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -35,7 +48,7 @@ func (s Server) Register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity)
 	}
 
-	result, err := s.userSvc.Register(request)
+	result, err := h.UserSvc.Register(request)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}

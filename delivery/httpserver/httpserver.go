@@ -3,10 +3,9 @@ package httpserver
 import (
 	"errors"
 	"event-manager/config"
+	"event-manager/delivery/httpserver/eventhandler"
 	internalMiddleware "event-manager/delivery/httpserver/middleware"
-	"event-manager/service/authservice"
-	"event-manager/service/eventservice"
-	"event-manager/service/userservice"
+	"event-manager/delivery/httpserver/userhandler"
 	"log/slog"
 	"net/http"
 
@@ -16,20 +15,17 @@ import (
 
 type Server struct {
 	config   config.Config
-	userSvc  userservice.UserService
-	authSvc  authservice.AuthService
-	eventSvc eventservice.EventService
+	eventHandler eventhandler.EventHandler
+	userHandler userhandler.UserHandler
 }
 
 func New(cnf config.Config,
-	userservice userservice.UserService,
-	authservice authservice.AuthService,
-	eventservice eventservice.EventService) Server {
+	uh userhandler.UserHandler,
+	eh eventhandler.EventHandler) Server {
 	return Server{
 		config:   cnf,
-		userSvc:  userservice,
-		authSvc:  authservice,
-		eventSvc: eventservice,
+		eventHandler: eh,
+		userHandler: uh,
 	}
 }
 
@@ -44,16 +40,16 @@ func (s Server) Serve() {
 
 	// auth
 	userGroup := e.Group("/users")
-	userGroup.POST("/register", s.Register)
-	userGroup.POST("/login", s.Login)
+	userGroup.POST("/register", s.userHandler.Register)
+	userGroup.POST("/login", s.userHandler.Login)
 
 	// event
-	eventGroup := e.Group("/events", internalMiddleware.Auth(s.authSvc, s.config.AuthConfig))
-	eventGroup.GET("/", s.IndexEvent)
-	eventGroup.GET("/:id", s.ShowEvent)
-	eventGroup.POST("/", s.CreateEvent)
-	eventGroup.PUT("/:id", s.UpdateEvent)
-	eventGroup.DELETE("/:id", s.DeleteEvent)
+	eventGroup := e.Group("/events", internalMiddleware.Auth(s.userHandler.AuthSvc, s.config.AuthConfig))
+	eventGroup.GET("/", s.eventHandler.IndexEvent)
+	eventGroup.GET("/:id", s.eventHandler.ShowEvent)
+	eventGroup.POST("/", s.eventHandler.CreateEvent)
+	eventGroup.PUT("/:id", s.eventHandler.UpdateEvent)
+	eventGroup.DELETE("/:id", s.eventHandler.DeleteEvent)
 
 	if err := e.Start(":8080"); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("failed to start server", "error", err)

@@ -3,6 +3,8 @@ package main
 import (
 	"event-manager/config"
 	"event-manager/delivery/httpserver"
+	"event-manager/delivery/httpserver/eventhandler"
+	"event-manager/delivery/httpserver/userhandler"
 	"event-manager/repository/mysql"
 	"event-manager/repository/mysql/mysqlevent"
 	"event-manager/repository/mysql/mysqluser"
@@ -13,6 +15,22 @@ import (
 
 func main() {
 	cnf := getConfig()
+	
+	authSvc, userSvc, eventSvc := services(cnf)
+	uh, eh := handlers(userSvc, authSvc, eventSvc)
+	hserver := httpserver.New(cnf, uh, eh)
+
+	hserver.Serve()
+}
+
+func handlers(us userservice.UserService, as authservice.AuthService, es eventservice.EventService) (userhandler.UserHandler, eventhandler.EventHandler) {
+	uh := userhandler.New(us, as)
+	eh := eventhandler.New(es)
+	
+	return uh, eh
+}
+
+func services(cnf config.Config) (authservice.AuthService, userservice.UserService, eventservice.EventService) {
 	mysql := mysql.New()
 	userRepo := mysqluser.New(mysql)
 	eventRepo := mysqlevent.New(mysql)
@@ -20,10 +38,8 @@ func main() {
 	authSvc := authservice.New(cnf.AuthConfig)
 	userSvc := userservice.New(userRepo, authSvc)
 	eventSvc := eventservice.New(eventRepo)
-
-	hserver := httpserver.New(cnf, userSvc, authSvc, eventSvc)
-
-	hserver.Serve()
+	
+	return authSvc, userSvc, eventSvc
 }
 
 func getConfig() config.Config {
