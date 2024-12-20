@@ -26,11 +26,11 @@ func New(config Config) AuthService {
 }
 
 func (s AuthService) CreateAccessToken(user entity.User) (string, error) {
-	return s.createToken(user.ID(), s.config.AccessSubject, s.config.AccessExpirationTime)
+	return s.createToken(user.ID, s.config.AccessSubject, s.config.AccessExpirationTime)
 }
 
 func (s AuthService) CreateRefreshToken(user entity.User) (string, error) {
-	return s.createToken(user.ID(), s.config.RefreshSubject, s.config.RefreshExpirationTime)
+	return s.createToken(user.ID, s.config.RefreshSubject, s.config.RefreshExpirationTime)
 }
 
 func (s AuthService) VerifyToken(bearerToken string) (*Claims, error) {

@@ -1,11 +1,11 @@
 package userhandler
 
 import (
+	"event-manager/param/userparam"
 	"event-manager/service/authservice"
 	"event-manager/service/userservice"
-	"event-manager/param/userparam"
-	"net/http"
 	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
 type UserHandler struct {
@@ -14,7 +14,7 @@ type UserHandler struct {
 }
 
 func New(us userservice.UserService, as authservice.AuthService) UserHandler {
-	return UserHandler {
+	return UserHandler{
 		UserSvc: us,
 		AuthSvc: as,
 	}

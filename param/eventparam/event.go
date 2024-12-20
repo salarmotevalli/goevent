@@ -13,8 +13,8 @@ type EventInfo struct {
 }
 
 func (e *EventInfo) FillFromEventEntity(event entity.Event) {
-	e.ID = event.ID()
-	e.Title = event.Title()
-	e.Location = event.Location()
-	e.StartAt = event.StartAt()
+	e.ID = event.ID
+	e.Title = event.Title
+	e.Location = event.Location
+	e.StartAt = event.StartAt
 }

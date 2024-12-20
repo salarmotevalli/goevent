@@ -16,7 +16,7 @@ type EventHandler struct {
 }
 
 func New(es eventservice.EventService) EventHandler {
-	return EventHandler {
+	return EventHandler{
 		eventSvc: es,
 	}
 }

@@ -44,7 +44,14 @@ func (r RichError) WithKind(kind Kind) RichError {
 }
 
 func (r RichError) WithMeta(meta map[string]interface{}) RichError {
-	r.meta = meta
+	if r.meta == nil {
+		r.meta = make(map[string]interface{}, len(meta))
+	}
+
+	for k, v := range meta {
+		r.meta[k] = v
+	}
+
 	return r
 }
 

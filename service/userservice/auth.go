@@ -48,14 +48,15 @@ func (s *UserService) Register(req userparam.RegisterUserRequest) (userparam.Reg
 	hashedPassword := getMD5Hash(req.Password)
 
 	// create new user in db
-	user := entity.User{}
-	user.SetUsername(req.Username)
-	user.SetPassword(hashedPassword)
+	user := entity.User{
+		UserName:       req.Username,
+		HashedPassword: hashedPassword,
+	}
 
 	user, err = s.repo.CreateUser(user)
 
 	return userparam.RegisterUserResponse{
-		User: userparam.UserInfo{Username: user.Username()},
+		User: userparam.UserInfo{Username: user.UserName},
 	}, err
 }
 
@@ -70,7 +71,7 @@ func (s *UserService) Login(req userparam.LoginRequest) (userparam.LoginResponse
 		return userparam.LoginResponse{}, errors.New("user not found")
 	}
 
-	if user.Password() != getMD5Hash(req.Password) {
+	if user.HashedPassword != getMD5Hash(req.Password) {
 		return userparam.LoginResponse{}, errors.New("password is incorrect")
 	}
 
@@ -85,7 +86,7 @@ func (s *UserService) Login(req userparam.LoginRequest) (userparam.LoginResponse
 	}
 
 	return userparam.LoginResponse{
-		User:         userparam.UserInfo{Username: user.Username()},
+		User:         userparam.UserInfo{Username: user.UserName},
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, err

@@ -14,18 +14,18 @@ import (
 )
 
 type Server struct {
-	config   config.Config
+	config       config.Config
 	eventHandler eventhandler.EventHandler
-	userHandler userhandler.UserHandler
+	userHandler  userhandler.UserHandler
 }
 
 func New(cnf config.Config,
 	uh userhandler.UserHandler,
 	eh eventhandler.EventHandler) Server {
 	return Server{
-		config:   cnf,
+		config:       cnf,
 		eventHandler: eh,
-		userHandler: uh,
+		userHandler:  uh,
 	}
 }
 
@@ -35,7 +35,7 @@ func (s Server) Serve() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	
+
 	e.GET("health-check", s.healthCheck)
 
 	// auth

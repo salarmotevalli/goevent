@@ -29,16 +29,7 @@ type eventModel struct {
 }
 
 func (e *eventModel) ToEventEntity() entity.Event {
-	var entiy entity.Event
-
-	entiy.SetID(e.id)
-	entiy.SetOwner(e.ownerID)
-	entiy.SetTitle(e.title)
-	entiy.SetLocation(e.location)
-	entiy.SetStartAt(e.startAt)
-	entiy.SetStatus(e.status)
-
-	return entiy
+	return entity.Event{ID: e.id, OwnerID: e.ownerID, Title: e.title, Location: e.location, StartAt: e.startAt, Status: e.status}
 }
 
 func (r EventRepo) GetEventByID(id uint) (entity.Event, bool, error) {
@@ -96,7 +87,7 @@ func (r EventRepo) CreateEvent(e entity.Event) (entity.Event, error) {
 	const op = "mysqlevent.CreateEvent"
 
 	res, err := r.conn.Conn().Exec("INSERT INTO events (title, location, start_at, owner_id, status, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-		e.Title(), e.Location(), e.StartAt(), e.OwnerID(), e.Status(), time.Now())
+		e.Title, e.Location, e.StartAt, e.OwnerID, e.Status, time.Now)
 
 	if err != nil {
 		return e, richerror.New(op).WithErr(err).
@@ -104,7 +95,7 @@ func (r EventRepo) CreateEvent(e entity.Event) (entity.Event, error) {
 	}
 
 	id, _ := res.LastInsertId()
-	e.SetID(uint(id))
+	e.ID = uint(id)
 
 	return e, nil
 }
@@ -112,7 +103,7 @@ func (r EventRepo) CreateEvent(e entity.Event) (entity.Event, error) {
 func (r EventRepo) UpdateEvent(event entity.Event) error {
 	const op = "mysqlevent.UpdateEvent"
 
-	_, err := r.conn.Conn().Exec("UPDATE events SET title=?, location=? WHERE id=?", event.Title(), event.Location(), event.ID())
+	_, err := r.conn.Conn().Exec("UPDATE events SET title=?, location=? WHERE id=?", event.Title, event.Location, event.ID)
 	if err != nil {
 		return richerror.New(op).WithErr(err).
 			WithKind(richerror.KindUnexpected)

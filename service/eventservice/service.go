@@ -59,13 +59,13 @@ func (s *EventService) GetEvent(eventId uint) (eventparam.GetEventResponse, erro
 }
 
 func (s *EventService) CreateNewEvent(req eventparam.CreateEventRequest) (eventparam.CreateEventResponse, error) {
-	var e entity.Event
-
-	e.SetOwner(req.OwnerID)
-	e.SetTitle(req.Title)
-	e.SetLocation(req.Location)
-	e.SetStartAt(req.StartAt)
-	e.Activate()
+	e := entity.Event{
+		OwnerID: req.OwnerID,
+		Title:   req.Title,
+		Location: req.Location,
+		StartAt:  req.StartAt,
+		Status:   entity.EvenetActiveStatus,
+	}
 
 	event, err := s.repo.CreateEvent(e)
 	var eventInfo eventparam.EventInfo
@@ -88,9 +88,9 @@ func (s *EventService) UpdateEvent(req eventparam.UpdateEventRequest) (eventpara
 	}
 
 	// update entity
-	event.SetTitle(req.Title)
-	event.SetLocation(req.Location)
-	event.SetStartAt(req.StartAt)
+	event.Title = req.Title
+	event.Location = req.Location
+	event.StartAt = req.StartAt
 
 	rErr := s.repo.UpdateEvent(event)
 	var eventInfo eventparam.EventInfo

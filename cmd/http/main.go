@@ -15,7 +15,7 @@ import (
 
 func main() {
 	cnf := getConfig()
-	
+
 	authSvc, userSvc, eventSvc := services(cnf)
 	uh, eh := handlers(userSvc, authSvc, eventSvc)
 	hserver := httpserver.New(cnf, uh, eh)
@@ -26,7 +26,7 @@ func main() {
 func handlers(us userservice.UserService, as authservice.AuthService, es eventservice.EventService) (userhandler.UserHandler, eventhandler.EventHandler) {
 	uh := userhandler.New(us, as)
 	eh := eventhandler.New(es)
-	
+
 	return uh, eh
 }
 
@@ -38,7 +38,7 @@ func services(cnf config.Config) (authservice.AuthService, userservice.UserServi
 	authSvc := authservice.New(cnf.AuthConfig)
 	userSvc := userservice.New(userRepo, authSvc)
 	eventSvc := eventservice.New(eventRepo)
-	
+
 	return authSvc, userSvc, eventSvc
 }
 

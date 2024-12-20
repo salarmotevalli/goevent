@@ -26,9 +26,9 @@ type userModel struct {
 func (e *userModel) ToUserEntity() entity.User {
 	var entiy entity.User
 
-	entiy.SetID(e.id)
-	entiy.SetUsername(e.username)
-	entiy.SetPassword(e.hashedPassword)
+	entiy.ID = e.id
+	entiy.UserName = e.username
+	entiy.HashedPassword = e.hashedPassword
 
 	return entiy
 }
@@ -56,7 +56,7 @@ func (r UserRepo) CreateUser(u entity.User) (entity.User, error) {
 	const op = "mysqluser.CreateUser"
 
 	res, err := r.conn.Conn().Exec(`insert into users (username, hashed_password) values (?, ?)`,
-		u.Username(), u.Password())
+		u.UserName, u.HashedPassword)
 
 	if err != nil {
 		return entity.User{}, richerror.New(op).
@@ -65,7 +65,7 @@ func (r UserRepo) CreateUser(u entity.User) (entity.User, error) {
 
 	// error is always nil
 	id, _ := res.LastInsertId()
-	u.SetID(uint(id))
+	u.ID = uint(id)
 
 	return u, nil
 }
