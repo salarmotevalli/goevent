@@ -3,6 +3,7 @@ package eventhandler
 import (
 	"event-manager/config"
 	"event-manager/param/eventparam"
+	"event-manager/pkg/httpmsg"
 	"event-manager/service/authservice"
 	"event-manager/service/eventservice"
 	"net/http"
@@ -27,16 +28,18 @@ func (h EventHandler) CreateEvent(c echo.Context) error {
 	var req eventparam.CreateEventRequest
 	err := c.Bind(&req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg})
 	}
 
 	req.OwnerID = claim.UserID
 
-	// Validation
-
 	res, err := h.eventSvc.CreateNewEvent(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg})
 	}
 
 	return c.JSON(http.StatusCreated, res)
@@ -45,29 +48,37 @@ func (h EventHandler) CreateEvent(c echo.Context) error {
 func (h EventHandler) IndexEvent(c echo.Context) error {
 	claim := c.Get(config.AuthMiddlewareContextKey).(*authservice.Claims)
 
-	events, err := h.eventSvc.GetAllEvents(claim.UserID)
+	var req eventparam.GetAllEventRequest
+	req.UserID = claim.UserID
+
+	events, err := h.eventSvc.GetAllEvents(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg})
 	}
 
 	return c.JSON(http.StatusOK, events)
 }
 
 func (h EventHandler) ShowEvent(c echo.Context) error {
-	// TODO: check user is owner of event
 	// claim := c.Get(config.AuthMiddlewareContextKey).(*authservice.Claims)
 
-	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
-
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest)
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg})
 	}
 
-	// TODO: retrive user id from jwt token
-	event, err := h.eventSvc.GetEvent(uint(id))
+	var req eventparam.GetEventRequest
+	req.EventID = uint(id)
+
+	event, err := h.eventSvc.GetEvent(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg})
 	}
 
 	return c.JSON(http.StatusOK, event)
@@ -77,22 +88,22 @@ func (h EventHandler) UpdateEvent(c echo.Context) error {
 	// TODO: check user is owner of event
 	// claim := c.Get(config.AuthMiddlewareContextKey).(*authservice.Claims)
 
-	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
-
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest)
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg})
 	}
 
 	var req eventparam.UpdateEventRequest
 	c.Bind(&req)
 	req.ID = uint(id)
 
-	// TODO: validation
-
 	res, sErr := h.eventSvc.UpdateEvent(req)
 	if sErr != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, sErr)
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg})
 	}
 
 	return c.JSON(http.StatusAccepted, res)
@@ -102,17 +113,20 @@ func (h EventHandler) DeleteEvent(c echo.Context) error {
 	// TODO: check user is owner of event
 	// claim := c.Get(config.AuthMiddlewareContextKey).(*authservice.Claims)
 
-	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest)
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg})
 	}
 
 	_, sErr := h.eventSvc.DeleteEvent(
 		eventparam.DeleteEventRequest{EventID: uint(id)})
 
 	if sErr != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, sErr)
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg})
 	}
 
 	return c.JSON(http.StatusNoContent, struct{}{})

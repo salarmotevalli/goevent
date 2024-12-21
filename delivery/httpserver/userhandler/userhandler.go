@@ -2,10 +2,12 @@ package userhandler
 
 import (
 	"event-manager/param/userparam"
+	"event-manager/pkg/httpmsg"
 	"event-manager/service/authservice"
 	"event-manager/service/userservice"
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 type UserHandler struct {
@@ -23,16 +25,16 @@ func New(us userservice.UserService, as authservice.AuthService) UserHandler {
 func (h UserHandler) Login(c echo.Context) error {
 	var request userparam.LoginRequest
 	if err := c.Bind(&request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	if len(request.Password) < 8 || len(request.Username) < 3 {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity)
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg})
 	}
 
 	result, err := h.UserSvc.Login(request)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg})
 	}
 
 	return c.JSON(http.StatusAccepted, result)
@@ -41,16 +43,16 @@ func (h UserHandler) Login(c echo.Context) error {
 func (h UserHandler) Register(c echo.Context) error {
 	var request userparam.RegisterUserRequest
 	if err := c.Bind(&request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	if len(request.Password) < 8 || len(request.Username) < 3 {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity)
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg})
 	}
 
 	result, err := h.UserSvc.Register(request)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg})
 	}
 
 	return c.JSON(http.StatusCreated, result)

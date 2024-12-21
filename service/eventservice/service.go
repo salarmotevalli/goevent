@@ -1,9 +1,9 @@
 package eventservice
 
 import (
-	"errors"
 	"event-manager/entity"
 	"event-manager/param/eventparam"
+	"event-manager/pkg/richerror"
 )
 
 type EventRepo interface {
@@ -24,10 +24,13 @@ func New(er EventRepo) EventService {
 	}
 }
 
-func (s *EventService) GetAllEvents(userId uint) (eventparam.GetAllEventResponse, error) {
-	events, err := s.repo.GetAllEventsFor(userId)
+func (s *EventService) GetAllEvents(req eventparam.GetAllEventRequest) (eventparam.GetAllEventResponse, error) {
+	const op = "eventservice.GetAllEvents"
+
+	events, err := s.repo.GetAllEventsFor(req.UserID)
 	if err != nil {
-		return eventparam.GetAllEventResponse{}, err
+		return eventparam.GetAllEventResponse{}, richerror.New(op).WithErr(err).
+			WithMeta(map[string]interface{}{"req": req})
 	}
 
 	eventInfos := make([]eventparam.EventInfo, 0)
@@ -40,14 +43,18 @@ func (s *EventService) GetAllEvents(userId uint) (eventparam.GetAllEventResponse
 	return eventparam.GetAllEventResponse{Events: eventInfos}, nil
 }
 
-func (s *EventService) GetEvent(eventId uint) (eventparam.GetEventResponse, error) {
-	event, exist, err := s.repo.GetEventByID(eventId)
+func (s *EventService) GetEvent(req eventparam.GetEventRequest) (eventparam.GetEventResponse, error) {
+	const op = "eventservice.GetEvent"
+
+	event, exist, err := s.repo.GetEventByID(req.EventID)
 	if err != nil {
-		return eventparam.GetEventResponse{}, err
+		return eventparam.GetEventResponse{}, richerror.New(op).WithErr(err).
+			WithMeta(map[string]interface{}{"req": req})
 	}
 
 	if !exist {
-		return eventparam.GetEventResponse{}, errors.New("not found")
+		return eventparam.GetEventResponse{}, richerror.New(op).WithKind(richerror.KindNotFound).
+			WithMeta(map[string]interface{}{"req": req})
 	}
 
 	var ei eventparam.EventInfo
@@ -59,32 +66,42 @@ func (s *EventService) GetEvent(eventId uint) (eventparam.GetEventResponse, erro
 }
 
 func (s *EventService) CreateNewEvent(req eventparam.CreateEventRequest) (eventparam.CreateEventResponse, error) {
+	const op = "eventservice.CreateNewEvent"
+	
 	e := entity.Event{
-		OwnerID: req.OwnerID,
-		Title:   req.Title,
+		OwnerID:  req.OwnerID,
+		Title:    req.Title,
 		Location: req.Location,
 		StartAt:  req.StartAt,
 		Status:   entity.EvenetActiveStatus,
 	}
 
 	event, err := s.repo.CreateEvent(e)
+	if err != nil {
+		return eventparam.CreateEventResponse{}, richerror.New(op).WithErr(err).
+			WithMeta(map[string]interface{}{"req": req})
+	}
+
 	var eventInfo eventparam.EventInfo
 	eventInfo.FillFromEventEntity(event)
 
 	return eventparam.CreateEventResponse{
 		Event: eventInfo,
-	}, err
+	}, nil
 }
 
 func (s *EventService) UpdateEvent(req eventparam.UpdateEventRequest) (eventparam.UpdateEventResponse, error) {
-	// fetch event
+	const op = "eventservice.UpdateEvent"
+
 	event, exist, err := s.repo.GetEventByID(req.ID)
 	if err != nil {
-		return eventparam.UpdateEventResponse{}, err
+		return eventparam.UpdateEventResponse{}, richerror.New(op).WithErr(err).
+			WithMeta(map[string]interface{}{"req": req})
 	}
 
 	if !exist {
-		return eventparam.UpdateEventResponse{}, errors.New("not found")
+		return eventparam.UpdateEventResponse{}, richerror.New(op).WithKind(richerror.KindNotFound).
+			WithMeta(map[string]interface{}{"req": req})
 	}
 
 	// update entity
@@ -93,26 +110,39 @@ func (s *EventService) UpdateEvent(req eventparam.UpdateEventRequest) (eventpara
 	event.StartAt = req.StartAt
 
 	rErr := s.repo.UpdateEvent(event)
+	if rErr != nil {
+		return eventparam.UpdateEventResponse{}, richerror.New(op).WithErr(rErr).
+			WithMeta(map[string]interface{}{"req": req})
+	}
+
 	var eventInfo eventparam.EventInfo
 	eventInfo.FillFromEventEntity(event)
 
 	return eventparam.UpdateEventResponse{
 		Event: eventInfo,
-	}, rErr
+	}, nil
 }
 
 func (s *EventService) DeleteEvent(req eventparam.DeleteEventRequest) (eventparam.DeleteEventResponse, error) {
+	const op = "eventservice.DeleteEvent"
+
 	_, exist, err := s.repo.GetEventByID(req.EventID)
 	if err != nil {
-		return eventparam.DeleteEventResponse{}, err
+		return eventparam.DeleteEventResponse{}, richerror.New(op).WithErr(err).
+			WithMeta(map[string]interface{}{"req": req})
 	}
 
 	// check is there or notfound
 	if !exist {
-		return eventparam.DeleteEventResponse{}, errors.New("not found")
+		return eventparam.DeleteEventResponse{}, richerror.New(op).WithKind(richerror.KindNotFound).
+			WithMeta(map[string]interface{}{"req": req})
 	}
 
 	rErr := s.repo.DeleteEvent(req.EventID)
+	if rErr != nil {
+		return eventparam.DeleteEventResponse{}, richerror.New(op).WithErr(rErr).
+			WithMeta(map[string]interface{}{"req": req})
+	}
 
-	return eventparam.DeleteEventResponse{}, rErr
+	return eventparam.DeleteEventResponse{}, nil
 }

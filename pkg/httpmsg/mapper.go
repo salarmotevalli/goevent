@@ -7,11 +7,9 @@ import (
 )
 
 func Error(err error) (message string, code int) {
-	switch err.(type) {
+	switch re := err.(type) {
 	case richerror.RichError:
-		re := err.(richerror.RichError)
 		msg := re.Message()
-
 		code := mapKindToHTTPStatusCode(re.Kind())
 
 		// we should not expose unexpected error messages
@@ -23,7 +21,6 @@ func Error(err error) (message string, code int) {
 	default:
 		return err.Error(), http.StatusBadRequest
 	}
-
 }
 
 func mapKindToHTTPStatusCode(k richerror.Kind) int {
@@ -36,6 +33,8 @@ func mapKindToHTTPStatusCode(k richerror.Kind) int {
 		return http.StatusForbidden
 	case richerror.KindUnexpected:
 		return http.StatusInternalServerError
+	case richerror.KindInvalidToken:
+		return http.StatusUnauthorized
 	default:
 		return http.StatusBadRequest
 	}

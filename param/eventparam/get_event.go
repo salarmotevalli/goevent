@@ -1,6 +1,8 @@
 package eventparam
 
-type ShhowEventRequest struct{}
+type GetEventRequest struct {
+	EventID uint `json:"event_id"`
+}
 
 type GetEventResponse struct {
 	Event EventInfo `json:"event"`

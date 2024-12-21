@@ -7,6 +7,7 @@ const (
 	KindForbidden
 	KindNotFound
 	KindUnexpected
+	KindInvalidToken
 )
 
 type Op string

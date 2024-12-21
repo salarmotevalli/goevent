@@ -1,8 +1,8 @@
 package authservice
 
 import (
-	"errors"
 	"event-manager/entity"
+	"event-manager/pkg/richerror"
 	"strings"
 	"time"
 
@@ -34,6 +34,8 @@ func (s AuthService) CreateRefreshToken(user entity.User) (string, error) {
 }
 
 func (s AuthService) VerifyToken(bearerToken string) (*Claims, error) {
+	const op = "authservice.VerifyToken"
+
 	tokenStr := strings.Replace(bearerToken, "Bearer ", "", 1)
 
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
@@ -41,13 +43,15 @@ func (s AuthService) VerifyToken(bearerToken string) (*Claims, error) {
 	}, jwt.WithLeeway(5*time.Second))
 
 	if err != nil {
-		return nil, err
+		return nil, richerror.New(op).WithErr(err).
+			WithKind(richerror.KindInvalidToken)
 	}
 
 	if claims, ok := token.Claims.(*Claims); ok {
 		return claims, nil
 	} else {
-		return nil, errors.New("unknown claims type, cannot proceed")
+		return nil, richerror.New(op).WithKind(richerror.KindInvalidToken).
+			WithMessage("unknown claims type, cannot proceed")
 	}
 }
 

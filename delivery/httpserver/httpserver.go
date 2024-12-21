@@ -44,12 +44,14 @@ func (s Server) Serve() {
 	userGroup.POST("/login", s.userHandler.Login)
 
 	// event
-	eventGroup := e.Group("/events", internalMiddleware.Auth(s.userHandler.AuthSvc, s.config.AuthConfig))
+	eventGroup := e.Group("/events")
+	eventAuth := eventGroup.Group("/", internalMiddleware.Auth(s.userHandler.AuthSvc, s.config.AuthConfig))
+
 	eventGroup.GET("/", s.eventHandler.IndexEvent)
 	eventGroup.GET("/:id", s.eventHandler.ShowEvent)
-	eventGroup.POST("/", s.eventHandler.CreateEvent)
-	eventGroup.PUT("/:id", s.eventHandler.UpdateEvent)
-	eventGroup.DELETE("/:id", s.eventHandler.DeleteEvent)
+	eventAuth.POST("/", s.eventHandler.CreateEvent)
+	eventAuth.PUT("/:id", s.eventHandler.UpdateEvent)
+	eventAuth.DELETE("/:id", s.eventHandler.DeleteEvent)
 
 	if err := e.Start(":8080"); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("failed to start server", "error", err)
